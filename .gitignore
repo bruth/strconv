@@ -1,6 +1,7 @@
 *.py?
 *.sw?
 *.egg-info
+__pycache__
 .coverage
 dist
 MANIFEST

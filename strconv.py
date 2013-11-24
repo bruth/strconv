@@ -1,7 +1,7 @@
 # strconv.py
 # Copyright (c) 2013 Byron Ruth
 # BSD License
-from __future__ import print_function
+
 
 __version__ = '0.2.0'
 
@@ -113,7 +113,7 @@ def get_converter(type_name):
 
 
 def convert(s, include_type=False):
-    if isinstance(s, basestring):
+    if isinstance(s, str):
         for t in converters_order:
             func = converters[t]
             try:
