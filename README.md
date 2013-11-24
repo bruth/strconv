@@ -1,5 +1,7 @@
 # strconv 
 
+[![Build Status](https://travis-ci.org/bruth/strconv.png?branch=master)](https://travis-ci.org/bruth/strconv) [![Coverage Status](https://coveralls.io/repos/bruth/strconv/badge.png?branch=master)](https://coveralls.io/r/bruth/strconv?branch=master)
+
 Library for inferring and converting strings into native Python types. The original use case for this was reading CSV data with unknown types and converting it into the inferred types so it be further manipulated.
 
 ## Install
