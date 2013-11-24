@@ -50,9 +50,6 @@ class StrConvTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('Mar 1, 2013T5:30:40 AM'), 'datetime')
         self.assertEqual(strconv.infer('Mar 1, 2013 5:30:40 AM'), 'datetime')
 
-    def test_infer_unicode(self):
-        self.assertEqual(strconv.infer('foobar'), 'unicode')
-
     def test_convert(self):
         self.assertEqual(strconv.convert('+0.4'), 0.4)
         self.assertEqual(strconv.convert('-3'), -3)
