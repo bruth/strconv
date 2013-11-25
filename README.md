@@ -1,10 +1,12 @@
 # strconv 
 
-[![Build Status](https://travis-ci.org/bruth/strconv.png?branch=master)](https://travis-ci.org/bruth/strconv) [![Coverage Status](https://coveralls.io/repos/bruth/strconv/badge.png?branch=master)](https://coveralls.io/r/bruth/strconv?branch=master)
+[![Build Status](https://travis-ci.org/bruth/strconv.png?branch=master)](https://travis-ci.org/bruth/strconv) [![Coverage Status](https://coveralls.io/repos/bruth/strconv/badge.png?branch=master)](https://coveralls.io/r/bruth/strconv?branch=master) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/bruth/strconv/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-Library for inferring and converting strings into native Python types. The original use case for this was reading CSV data with unknown types and converting it into the inferred types so it be further manipulated.
+Library for inferring and converting strings into native Python types. The original use case for this was reading CSV data with unknown types and converting it into native types for further manipulation.
 
 ## Install
+
+**Supports Python 2.7, 3.2, and 3.3**
 
 ```
 pip install strconv
@@ -117,4 +119,26 @@ Type inference of strings is a very difficult thing to generalize. Often times t
 >>> strconv.register_converter('none', convert_none, priority=0)
 >>> list(strconv.convert_series(['\N', '', 'na', 'unk']))
 [None, None, None, None]
+```
+
+**Unregister Converter**
+
+Any of the default converters can be unregistered by name. This is recommended if the data is known not to have certain types.
+
+```python
+strconv.unregister_convert('datetime')
+```
+
+**Strconv Class**
+
+The `Strconv` class encapsulates all of the above functionality which makes it possible to create separate instance for different kinds of files or processing. All the above functions are simply references to the default instance. Instantiate a new empty instance:
+
+```python
+mystrconv = strconv.Strconv()
+```
+
+The built-in converters are defined in the module:
+
+```python
+mystrconv.register_converter('int', strconv.convert_int)
 ```
