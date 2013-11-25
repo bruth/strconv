@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Strconv by bruth</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Strconv</h1>
+        <p>String type inference and conversion</p>
+        <p class="view"><a href="https://github.com/bruth/strconv">View the Project on GitHub <small>bruth/strconv</small></a></p>
+        <ul>
+          <li><a href="https://github.com/bruth/strconv/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/bruth/strconv/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/bruth/strconv">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="https://travis-ci.org/bruth/strconv"><img src="https://travis-ci.org/bruth/strconv.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/bruth/strconv?branch=master"><img src="https://coveralls.io/repos/bruth/strconv/badge.png?branch=master" alt="Coverage Status"></a> <a href="https://bitdeli.com/free" title="Bitdeli Badge"><img src="https://d2weczhvl823v0.cloudfront.net/bruth/strconv/trend.png" alt="Bitdeli Badge"></a></p>
+
+<p>Library for inferring and converting strings into native Python types. The original use case for this was reading CSV data with unknown types and converting it into native types for further manipulation.</p>
+
+<h2>
+<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<p><strong>Supports Python 2.7, 3.2, and 3.3</strong></p>
+
+<pre><code>pip install strconv
+</code></pre>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="conversion" class="anchor" href="#conversion"><span class="octicon octicon-link"></span></a>Conversion</h3>
+
+<p><strong>convert(s, include_type=False)</strong></p>
+
+<p>Attempts to convert string <code>s</code> into a non-string type. If <code>include_type</code> is true, the type name is returned as a second value.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">strconv</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'1.2'</span><span class="p">)</span>
+<span class="mf">1.2</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'true'</span><span class="p">)</span>
+<span class="bp">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'2013-03-01'</span><span class="p">,</span> <span class="n">include_type</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="p">(</span><span class="n">date</span><span class="p">(</span><span class="mi">2013</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s">'date'</span><span class="p">)</span>
+</pre></div>
+
+<p><strong>convert_series(i, include_type=False)</strong></p>
+
+<p>Takes an interable and returns a generator. Each value will be converted independently. If <code>include_type</code> is true, each value will be paired with it's type name.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">strconv</span><span class="o">.</span><span class="n">convert_series</span><span class="p">([</span><span class="s">'1'</span><span class="p">,</span> <span class="s">'1.2'</span><span class="p">,</span> <span class="s">'t'</span><span class="p">,</span> <span class="s">'2013-01-01'</span><span class="p">]))</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">date</span><span class="p">(</span><span class="mi">2013</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+
+<p><strong>convert_matrix(m, include_type=False)</strong></p>
+
+<p>Takes a matrix (iterable of iterables) and returns a generator. Each value will be converted independently. If <code>include_type</code> is true, each value will be paired with it's type name.</p>
+
+<p><em>A CSV reader can be directly passed into this function.</em></p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">csv</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">'data.csv'</span><span class="p">,</span> <span class="s">'rb'</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">strconv</span><span class="o">.</span><span class="n">convert_matrix</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+<span class="o">...</span>     <span class="o">...</span>
+</pre></div>
+
+<h3>
+<a name="inference" class="anchor" href="#inference"><span class="octicon octicon-link"></span></a>Inference</h3>
+
+<p>These functions are merely convenience wrappers for the above <code>convert*</code> functions to return only the converter type or the converted value's type.</p>
+
+<p><strong>infer(s, converted=False)</strong></p>
+
+<p>Returns the converter's type of the string value. If <code>converted</code> is true, the type of the converted value will be returned.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">infer</span><span class="p">(</span><span class="s">'1'</span><span class="p">)</span>
+<span class="s">'int'</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">infer</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="n">converted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="nb">int</span>
+</pre></div>
+
+<p><strong>infer_series(i, n=None, size=10)</strong></p>
+
+<p>Infers the types of a series of values. The original use case for this was to take a column of data and infer all the teypes that exist in the data. This would confirm whether the data contains heterogeneous values.</p>
+
+<p>The output of this is a <code>Types</code> instance which stores information and a sample of the values for inspection. If <code>n</code> is an integer, only N values will be evaluated. <code>size</code> is the number of values per type that will be stored as a sample set for inspection (greater <code>size</code> == more memory).</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">info</span> <span class="o">=</span> <span class="n">strconv</span><span class="o">.</span><span class="n">infer_series</span><span class="p">([</span><span class="s">'10'</span><span class="p">,</span> <span class="s">'5'</span><span class="p">,</span> <span class="s">''</span><span class="p">,</span> <span class="s">'-1'</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">info</span>
+<span class="o">&lt;</span><span class="n">Types</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">unknown</span><span class="o">=</span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">info</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">[(</span><span class="s">'int'</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">info</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="s">'int'</span><span class="p">]</span><span class="o">.</span><span class="n">freq</span><span class="p">()</span>
+<span class="mf">0.75</span>
+</pre></div>
+
+<p><strong>infer_matrix(m, n=None, size=10)</strong></p>
+
+<p>Same as <code>infer_series</code> except it will take a matrix of values. Type information will be stored per column not per row. The output will be a list of <code>Types</code> instances of lenght M where <code>m</code> is of size NxM.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">csv</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">'data.csv'</span><span class="p">,</span> <span class="s">'rb'</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">col_types</span> <span class="o">=</span> <span class="n">strconv</span><span class="o">.</span><span class="n">infer_matrix</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="converters" class="anchor" href="#converters"><span class="octicon octicon-link"></span></a>Converters</h2>
+
+<p>Converters are registered by some name and are evaluated in order. Converters should be ordered from the most specific + less complex to the least specific + most complex since once a value matches, further evaluation is stopped. Below are the built-in converters listed in order.</p>
+
+<ul>
+<li><code>int</code></li>
+<li><code>float</code></li>
+<li>
+<code>bool</code> - case-insensitive conversion: <code>t</code>, <code>true</code>, <code>yes</code> to <code>True</code> and <code>f</code>, <code>false</code>, <code>no</code> to <code>False</code>
+</li>
+<li>
+<code>date</code> - see <code>strconv.DATE_FORMATS</code> for the default date formats</li>
+<li>
+<code>time</code> - see <code>strconv.TIME_FORMATS</code> for the default time formats</li>
+<li>
+<code>datetime</code> - converts using each combination of the date and time formats with either <code>T</code> or a single space as the separate, e.g. '2013-03-20T13:05:32'</li>
+</ul><h2>
+<a name="customize" class="anchor" href="#customize"><span class="octicon octicon-link"></span></a>Customize</h2>
+
+<p>Type inference of strings is a very difficult thing to generalize. Often times there is subtle nuances to the data that require domain knowledge in order to infer the correct type. <code>strconv</code> makes it as simple as possible to customize the behavior of the inference and conversion.</p>
+
+<p><strong>Register Converter</strong></p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">convert_none</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s">'\N'</span><span class="p">,</span> <span class="s">'NA'</span><span class="p">,</span> <span class="s">'N/A'</span><span class="p">,</span> <span class="s">''</span><span class="p">,</span> <span class="s">'UNK'</span><span class="p">):</span>
+<span class="o">...</span>         <span class="k">return</span>
+<span class="o">...</span>     <span class="k">raise</span> <span class="ne">ValueError</span>
+<span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">strconv</span><span class="o">.</span><span class="n">register_converter</span><span class="p">(</span><span class="s">'none'</span><span class="p">,</span> <span class="n">convert_none</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">strconv</span><span class="o">.</span><span class="n">convert_series</span><span class="p">([</span><span class="s">'\N'</span><span class="p">,</span> <span class="s">''</span><span class="p">,</span> <span class="s">'na'</span><span class="p">,</span> <span class="s">'unk'</span><span class="p">]))</span>
+<span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+</pre></div>
+
+<p><strong>Unregister Converter</strong></p>
+
+<p>Any of the default converters can be unregistered by name. This is recommended if the data is known not to have certain types.</p>
+
+<div class="highlight highlight-python"><pre><span class="n">strconv</span><span class="o">.</span><span class="n">unregister_convert</span><span class="p">(</span><span class="s">'datetime'</span><span class="p">)</span>
+</pre></div>
+
+<p><strong>Strconv Class</strong></p>
+
+<p>The <code>Strconv</code> class encapsulates all of the above functionality which makes it possible to create separate instance for different kinds of files or processing. All the above functions are simply references to the default instance. Instantiate a new empty instance:</p>
+
+<div class="highlight highlight-python"><pre><span class="n">mystrconv</span> <span class="o">=</span> <span class="n">strconv</span><span class="o">.</span><span class="n">Strconv</span><span class="p">()</span>
+</pre></div>
+
+<p>The built-in converters are defined in the module:</p>
+
+<div class="highlight highlight-python"><pre><span class="n">mystrconv</span><span class="o">.</span><span class="n">register_converter</span><span class="p">(</span><span class="s">'int'</span><span class="p">,</span> <span class="n">strconv</span><span class="o">.</span><span class="n">convert_int</span><span class="p">)</span>
+</pre></div>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/bruth">bruth</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
