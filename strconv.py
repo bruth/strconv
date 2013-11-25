@@ -2,16 +2,15 @@
 # Copyright (c) 2013 Byron Ruth
 # BSD License
 
-
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 from collections import Counter
 
 
 class TypeInfo(object):
     "Sampling and frequency of a type for a sample of values."
-    def __init__(self, type_name, size=None, total=None):
-        self.type_name = type_name
+    def __init__(self, name, size=None, total=None):
+        self.name = name
         self.count = 0
         self.sample = []
         self.size = size
@@ -20,7 +19,7 @@ class TypeInfo(object):
 
     def __repr__(self):
         return '<{0}: {1} n={2}>'.format(self.__class__.__name__,
-                                         self.type_name, self.count)
+                                         self.name, self.count)
 
     def incr(self, n=1):
         self.count += n
@@ -78,117 +77,112 @@ class Types(object):
         return c.most_common(n)
 
 
-converters = {}
-converters_order = []
+class Strconv(object):
+    def __init__(self, converters=()):
+        self.converters = {}
+        self._order = []
 
+        for name, func in converters:
+            self.converters[name] = func
+            self._order.append(name)
 
-def register_converter(type_name, func, priority=None):
-    if type_name is None:
-        raise ValueError('type name cannot be None')
-    if not callable(func):
-        raise ValueError('converter functions must be callable')
+    def register_converter(self, name, func, priority=None):
+        if name is None:
+            raise ValueError('type name cannot be None')
+        if not callable(func):
+            raise ValueError('converter functions must be callable')
 
-    converters[type_name] = func
+        self.converters[name] = func
 
-    if type_name in converters_order:
-        converters_order.remove(type_name)
+        if name in self._order:
+            self._order.remove(name)
 
-    if priority is not None and priority < len(converters_order):
-        converters_order.insert(priority, type_name)
-    else:
-        converters_order.append(type_name)
+        if priority is not None and priority < len(self._order):
+            self._order.insert(priority, name)
+        else:
+            self._order.append(name)
 
+    def unregister_converter(self, name):
+        if name in self._order:
+            self._order.remove(name)
+        if name in self.converters:
+            del self.converters[name]
 
-def unregister_converter(type_name):
-    if type_name in converters_order:
-        converters_order.remove(type_name)
-    if type_name in converters:
-        del converters[type_name]
+    def get_converter(self, name):
+        if name not in self.converters:
+            raise KeyError('no converter for type "{0}"'.format(name))
+        return self.converters[name]
 
+    def convert(self, s, include_type=False):
+        if isinstance(s, str):
+            for t in self._order:
+                func = self.converters[t]
+                try:
+                    v = func(s)
+                    if include_type:
+                        return v, t
+                    return v
+                except ValueError:
+                    pass
+        if include_type:
+            return s, None
+        return s
 
-def get_converter(type_name):
-    if type_name not in converters:
-        raise KeyError('no converter for type "{0}"'.format(type_name))
-    return converters[type_name]
+    def convert_series(self, iterable, include_type=False):
+        for s in iterable:
+            yield self.convert(s, include_type=include_type)
 
+    def convert_matrix(self, matrix, include_type=False):
+        for r in matrix:
+            yield tuple(self.convert(s, include_type=include_type) for s in r)
 
-def convert(s, include_type=False):
-    if isinstance(s, str):
-        for t in converters_order:
-            func = converters[t]
-            try:
-                v = func(s)
-                if include_type:
-                    return v, t
-                return v
-            except ValueError:
-                pass
-    if include_type:
-        return s, None
-    return s
+    def infer(self, s, converted=False):
+        v, t = self.convert(s, include_type=True)
+        if t and converted:
+            return type(v)
+        return t
 
+    def infer_series(self, iterable, n=None, size=10):
+        info = Types(size=size)
+        i = -1
 
-def convert_series(iterable, include_type=False):
-    c = convert
-    for s in iterable:
-        yield c(s, include_type=include_type)
+        for i, value in enumerate(iterable):
+            if n and i > n:
+                i = n
+                break
 
-
-def convert_matrix(matrix, include_type=False):
-    c = convert
-    for r in matrix:
-        yield tuple(c(s, include_type=include_type) for s in r)
-
-
-def infer(s, converted=False):
-    v, t = convert(s, include_type=True)
-    if t and converted:
-        return type(v)
-    return t
-
-
-def infer_series(iterable, n=None, size=10):
-    info = Types(size=size)
-    i = -1
-
-    for i, value in enumerate(iterable):
-        if n and i > n:
-            i = n
-            break
-
-        t = infer(value)
-        info.incr(t)
-        info.add(t, i, value)
-    else:
-        i += 1
-
-    info.set_total(i)
-    return info
-
-
-def infer_matrix(matrix, n=None, size=10):
-    infos = []
-    i = -1
-
-    for i, iterable in enumerate(matrix):
-        if n and i > n:
-            i = n
-            break
-
-        for j, value in enumerate(iterable):
-            if i == 0:
-                infos.append(Types(size=size))
-            info = infos[j]
-
-            t = infer(value)
+            t = self.infer(value)
             info.incr(t)
             info.add(t, i, value)
-    else:
-        i += 1
+        else:
+            i += 1
 
-    for info in infos:
         info.set_total(i)
-    return infos
+        return info
+
+    def infer_matrix(self, matrix, n=None, size=10):
+        infos = []
+        i = -1
+
+        for i, iterable in enumerate(matrix):
+            if n and i > n:
+                i = n
+                break
+
+            for j, value in enumerate(iterable):
+                if i == 0:
+                    infos.append(Types(size=size))
+                info = infos[j]
+
+                t = self.infer(value)
+                info.incr(t)
+                info.add(t, i, value)
+        else:
+            i += 1
+
+        for info in infos:
+            info.set_total(i)
+        return infos
 
 
 # Built-in converters
@@ -267,9 +261,24 @@ def convert_time(s, time_formats=TIME_FORMATS):
     raise ValueError
 
 
-register_converter('int', convert_int)
-register_converter('float', convert_float)
-register_converter('bool', convert_bool)
-register_converter('date', convert_date)
-register_converter('time', convert_time)
-register_converter('datetime', convert_datetime)
+# Initialize default instance and make accessible at the module level
+default_strconv = Strconv(converters=[
+    ('int', convert_int),
+    ('float', convert_float),
+    ('bool', convert_bool),
+    ('date', convert_date),
+    ('time', convert_time),
+    ('datetime', convert_datetime),
+])
+
+register_converter = default_strconv.register_converter
+unregister_converter = default_strconv.unregister_converter
+get_converter = default_strconv.get_converter
+
+convert = default_strconv.convert
+convert_series = default_strconv.convert_series
+convert_matrix = default_strconv.convert_matrix
+
+infer = default_strconv.infer
+infer_series = default_strconv.infer_series
+infer_matrix = default_strconv.infer_matrix
