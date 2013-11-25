@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = strconv.py
+    
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    def __bytes__
+    def __unicode__
+    if self.debug:
+    if __name__ == .__main__.:

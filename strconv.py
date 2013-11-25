@@ -147,15 +147,18 @@ class Strconv(object):
         i = -1
 
         for i, value in enumerate(iterable):
-            if n and i > n:
-                i = n
+            if n and i >= n:
                 break
 
             t = self.infer(value)
             info.incr(t)
             info.add(t, i, value)
-        else:
-            i += 1
+
+        i += 1
+
+        # No reason to return type info when no data exists
+        if i == 0:
+            return
 
         info.set_total(i)
         return info
@@ -165,8 +168,7 @@ class Strconv(object):
         i = -1
 
         for i, iterable in enumerate(matrix):
-            if n and i > n:
-                i = n
+            if n and i >= n:
                 break
 
             for j, value in enumerate(iterable):
@@ -177,11 +179,12 @@ class Strconv(object):
                 t = self.infer(value)
                 info.incr(t)
                 info.add(t, i, value)
-        else:
-            i += 1
+
+        i += 1
 
         for info in infos:
             info.set_total(i)
+
         return infos
 
 
