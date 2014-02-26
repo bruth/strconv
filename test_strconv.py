@@ -3,6 +3,7 @@
 import unittest
 import strconv
 from datetime import datetime, date, time
+from dateutil.tz import tzoffset
 
 
 class StrconvTestCase(unittest.TestCase):
@@ -43,8 +44,8 @@ class ConvertTestCase(unittest.TestCase):
         self.assertEqual(strconv.convert('-3'), -3)
         self.assertEqual(strconv.convert('+0.4'), 0.4)
         self.assertEqual(strconv.convert('true'), True)
-        self.assertEqual(strconv.convert('3/20/2013'), date(2013, 3, 20))
-        self.assertEqual(strconv.convert('5:40 PM'), time(17, 40, 0))
+        self.assertEqual(strconv.convert('3/20/2013'), datetime(2013, 3, 20))
+        self.assertEqual(strconv.convert('5:40 PM'), time(17, 40))
         self.assertEqual(strconv.convert('March 4, 2013 5:40 PM'),
                          datetime(2013, 3, 4, 17, 40, 0))
 
@@ -63,7 +64,7 @@ class InferTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('-3'), 'int')
         self.assertEqual(strconv.infer('+0.4'), 'float')
         self.assertEqual(strconv.infer('true'), 'bool')
-        self.assertEqual(strconv.infer('3/20/2013'), 'date')
+        self.assertEqual(strconv.infer('3/20/2013'), 'datetime')
         self.assertEqual(strconv.infer('5:40 PM'), 'time')
         self.assertEqual(strconv.infer('March 4, 2013 5:40 PM'), 'datetime')
 
@@ -71,7 +72,7 @@ class InferTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('-3', converted=True), int)
         self.assertEqual(strconv.infer('+0.4', converted=True), float)
         self.assertEqual(strconv.infer('true', converted=True), bool)
-        self.assertEqual(strconv.infer('3/20/2013', converted=True), date)
+        self.assertEqual(strconv.infer('3/20/2013', converted=True), datetime)
         self.assertEqual(strconv.infer('5:40 PM', converted=True), time)
         self.assertEqual(strconv.infer('March 4, 2013 5:40 PM',
                          converted=True), datetime)
@@ -141,16 +142,22 @@ class ConverterTestCase(unittest.TestCase):
         self.assertEqual(strconv.convert_time('01:30'), time(1, 30, 0))
         self.assertEqual(strconv.convert_time('1:30'), time(1, 30, 0))
         self.assertEqual(strconv.convert_time('1:30:40'), time(1, 30, 40))
+        self.assertEqual(strconv.convert_time('1:30:40 pm'), time(13, 30, 40))
         self.assertEqual(strconv.convert_time('15:30:40'), time(15, 30, 40))
         self.assertEqual(strconv.convert_time('5:30:40 AM'), time(5, 30, 40))
 
     def test_convert_datetime(self):
+        tzoff = tzoffset(None, -18000)
+
         self.assertEqual(strconv.convert_datetime('Mar 1, 2013T5:30:40 AM'),
                          datetime(2013, 3, 1, 5, 30, 40))
         self.assertEqual(strconv.convert_datetime('Mar 1, 2013 5:30:40 AM'),
                          datetime(2013, 3, 1, 5, 30, 40))
         self.assertRaises(ValueError, strconv.convert_datetime, 'foo')
 
+        # TZ
+        self.assertEqual(strconv.convert_datetime('2013-03-01 5:30:40 -0500'),
+                         datetime(2013, 3, 1, 5, 30, 40, tzinfo=tzoff))
 
 if __name__ == '__main__':
     unittest.main()

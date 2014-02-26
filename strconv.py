@@ -2,7 +2,7 @@
 # Copyright (c) 2013 Byron Ruth
 # BSD License
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 from collections import Counter
 
@@ -191,7 +191,19 @@ class Strconv(object):
 # Built-in converters
 
 import re
+
 from datetime import datetime
+
+# Use dateutil for more robust parsing
+try:
+    from dateutil.parser import parse as duparse
+except ImportError:
+    import warnings
+    warnings.warn('python-dateutil is not installed. As of version 0.5, '
+                  'this will be a hard dependency of strconv for'
+                  'datetime parsing. Without it, only a limited set of '
+                  'datetime formats are supported without timezones.')
+    duparse = None
 
 DATE_FORMATS = (
     '%Y-%m-%d',
@@ -213,6 +225,7 @@ TIME_FORMATS = (
     '%I:%M',
 )
 
+DATE_TIME_SEPS = (' ', 'T')
 
 true_re = re.compile(r'^(t(rue)?|yes)$', re.I)
 false_re = re.compile(r'^(f(alse)?|no)$', re.I)
@@ -235,9 +248,15 @@ def convert_bool(s):
 
 
 def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
+    if duparse:
+        try:
+            return duparse(s)
+        except TypeError:  # parse may throw this in py3
+            raise ValueError
+
     for df in date_formats:
         for tf in time_formats:
-            for sep in (' ', 'T'):
+            for sep in DATE_TIME_SEPS:
                 f = '{0}{1}{2}'.format(df, sep, tf)
                 try:
                     return datetime.strptime(s, f)
@@ -247,6 +266,12 @@ def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
 
 
 def convert_date(s, date_formats=DATE_FORMATS):
+    if duparse:
+        try:
+            return duparse(s).date()
+        except TypeError:  # parse may throw this in py3
+            raise ValueError
+
     for f in date_formats:
         try:
             return datetime.strptime(s, f).date()
@@ -258,7 +283,7 @@ def convert_date(s, date_formats=DATE_FORMATS):
 def convert_time(s, time_formats=TIME_FORMATS):
     for f in time_formats:
         try:
-            return datetime.strptime(s.upper(), f).time()
+            return datetime.strptime(s, f).time()
         except ValueError:
             pass
     raise ValueError
@@ -269,9 +294,9 @@ default_strconv = Strconv(converters=[
     ('int', convert_int),
     ('float', convert_float),
     ('bool', convert_bool),
-    ('date', convert_date),
     ('time', convert_time),
     ('datetime', convert_datetime),
+    ('date', convert_date),
 ])
 
 register_converter = default_strconv.register_converter
