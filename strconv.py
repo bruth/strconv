@@ -250,7 +250,9 @@ def convert_bool(s):
 def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
     if duparse:
         try:
-            return duparse(s)
+            dt = duparse(s)
+            if dt.time():
+                return duparse(s)
         except TypeError:  # parse may throw this in py3
             raise ValueError
 
@@ -259,7 +261,9 @@ def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
             for sep in DATE_TIME_SEPS:
                 f = '{0}{1}{2}'.format(df, sep, tf)
                 try:
-                    return datetime.strptime(s, f)
+                    dt = datetime.strptime(s, f)
+                    if dt.time():
+                        return dt
                 except ValueError:
                     pass
     raise ValueError
