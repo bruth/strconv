@@ -295,8 +295,8 @@ default_strconv = Strconv(converters=[
     ('float', convert_float),
     ('bool', convert_bool),
     ('time', convert_time),
-    ('datetime', convert_datetime),
     ('date', convert_date),
+    ('datetime', convert_datetime),
 ])
 
 register_converter = default_strconv.register_converter
