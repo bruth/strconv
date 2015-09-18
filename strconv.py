@@ -2,7 +2,7 @@
 # Copyright (c) 2013 Byron Ruth
 # BSD License
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 from collections import Counter
 
