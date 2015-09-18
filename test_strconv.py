@@ -44,7 +44,7 @@ class ConvertTestCase(unittest.TestCase):
         self.assertEqual(strconv.convert('-3'), -3)
         self.assertEqual(strconv.convert('+0.4'), 0.4)
         self.assertEqual(strconv.convert('true'), True)
-        self.assertEqual(strconv.convert('3/20/2013'), datetime(2013, 3, 20))
+        self.assertEqual(strconv.convert('3/20/2013'), date(2013, 3, 20))
         self.assertEqual(strconv.convert('5:40 PM'), time(17, 40))
         self.assertEqual(strconv.convert('March 4, 2013 5:40 PM'),
                          datetime(2013, 3, 4, 17, 40, 0))
@@ -64,7 +64,7 @@ class InferTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('-3'), 'int')
         self.assertEqual(strconv.infer('+0.4'), 'float')
         self.assertEqual(strconv.infer('true'), 'bool')
-        self.assertEqual(strconv.infer('3/20/2013'), 'datetime')
+        self.assertEqual(strconv.infer('3/20/2013'), 'date')
         self.assertEqual(strconv.infer('5:40 PM'), 'time')
         self.assertEqual(strconv.infer('March 4, 2013 5:40 PM'), 'datetime')
 
@@ -72,7 +72,7 @@ class InferTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('-3', converted=True), int)
         self.assertEqual(strconv.infer('+0.4', converted=True), float)
         self.assertEqual(strconv.infer('true', converted=True), bool)
-        self.assertEqual(strconv.infer('3/20/2013', converted=True), datetime)
+        self.assertEqual(strconv.infer('3/20/2013', converted=True), date)
         self.assertEqual(strconv.infer('5:40 PM', converted=True), time)
         self.assertEqual(strconv.infer('March 4, 2013 5:40 PM',
                          converted=True), datetime)
