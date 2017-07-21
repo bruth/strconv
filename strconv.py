@@ -46,7 +46,7 @@ class Types(object):
 
     def __repr__(self):
         types = self.most_common()
-        label = ', '.join(['{0}={1}'.format(t, i.count) for t, i in types])
+        label = ', '.join(['{0}={1}'.format(t, i) for t, i in types])
         return '<{0}: {1}>'.format(self.__class__.__name__, label)
 
     def incr(self, t, n=1):
