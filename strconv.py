@@ -1,10 +1,12 @@
+
+from collections import Counter
+from datetime import datetime
+import re
+
+__version__ = '0.4.1'
 # strconv.py
 # Copyright (c) 2013 Byron Ruth
 # BSD License
-
-__version__ = '0.4.1'
-
-from collections import Counter
 
 
 class TypeInfo(object):
@@ -189,10 +191,6 @@ class Strconv(object):
 
 
 # Built-in converters
-
-import re
-
-from datetime import datetime
 
 # Use dateutil for more robust parsing
 try:
