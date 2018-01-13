@@ -208,6 +208,7 @@ except ImportError:
 DATE_FORMATS = (
     '%Y-%m-%d',
     '%m-%d-%Y',
+    '%Y/%m/%d',
     '%m/%d/%Y',
     '%m.%d.%Y',
     '%m-%d-%y',
@@ -261,9 +262,7 @@ def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
             for sep in DATE_TIME_SEPS:
                 f = '{0}{1}{2}'.format(df, sep, tf)
                 try:
-                    dt = datetime.strptime(s, f)
-                    if dt.time():
-                        return dt
+                    return datetime.strptime(s, f)
                 except ValueError:
                     pass
     raise ValueError
