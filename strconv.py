@@ -3,6 +3,8 @@ from collections import Counter
 from datetime import datetime
 import re
 
+import sys
+
 __version__ = '0.4.1'
 # strconv.py
 # Copyright (c) 2013 Byron Ruth
@@ -220,7 +222,9 @@ TIME_FORMATS = (
     '%H:%M:%S',
     '%H:%M',
     '%I:%M:%S %p',
+    '%I:%M:%S %z',
     '%I:%M %p',
+    '%I:%M %z',
     '%I:%M',
 )
 
@@ -247,13 +251,14 @@ def convert_bool(s):
 
 
 def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
-    if duparse:
-        try:
-            dt = duparse(s)
-            if dt.time():
-                return duparse(s)
-        except TypeError:  # parse may throw this in py3
-            raise ValueError
+    if sys.version < '3.5':
+        if duparse:
+            try:
+                dt = duparse(s)
+                if dt.time():
+                    return duparse(s)
+            except TypeError:  # parse may throw this in py3
+                raise ValueError
 
     for df in date_formats:
         for tf in time_formats:
