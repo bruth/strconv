@@ -1,9 +1,9 @@
+import re
+import sys
 
 from collections import Counter
 from datetime import datetime
-import re
 
-import sys
 
 __version__ = '0.4.1'
 # strconv.py
