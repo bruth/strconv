@@ -48,6 +48,8 @@ class ConvertTestCase(unittest.TestCase):
         self.assertEqual(strconv.convert('5:40 PM'), time(17, 40))
         self.assertEqual(strconv.convert('March 4, 2013 5:40 PM'),
                          datetime(2013, 3, 4, 17, 40, 0))
+        self.assertEqual(strconv.convert('March 4, 2013 12:00 AM'),
+                         datetime(2013, 3, 4, 0, 0))
 
     def test_convert_include_type(self):
         self.assertEqual(strconv.convert('-3', include_type=True), (-3, 'int'))
@@ -67,6 +69,13 @@ class InferTestCase(unittest.TestCase):
         self.assertEqual(strconv.infer('3/20/2013'), 'date')
         self.assertEqual(strconv.infer('5:40 PM'), 'time')
         self.assertEqual(strconv.infer('March 4, 2013 5:40 PM'), 'datetime')
+        self.assertEqual(strconv.infer('2018-12-01 00:00:00'), 'datetime')
+        self.assertEqual(strconv.infer('March 4, 2013 12:00 PM'), 'datetime')
+        # Midnight
+        self.assertEqual(strconv.convert_datetime('2013-03-01 00:00:00'),
+                         datetime(2013, 3, 1, 0, 0, 0))
+        self.assertEqual(strconv.convert_datetime('2018/03/01 00:00:00'),
+                         datetime(2018, 3, 1, 0, 0, 0))
 
     def test_infer_converted(self):
         self.assertEqual(strconv.infer('-3', converted=True), int)
@@ -158,6 +167,7 @@ class ConverterTestCase(unittest.TestCase):
         # TZ
         self.assertEqual(strconv.convert_datetime('2013-03-01 5:30:40 -0500'),
                          datetime(2013, 3, 1, 5, 30, 40, tzinfo=tzoff))
+
 
 if __name__ == '__main__':
     unittest.main()

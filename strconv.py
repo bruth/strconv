@@ -1,10 +1,14 @@
+import re
+import sys
+
+from collections import Counter
+from datetime import datetime
+
+
+__version__ = '0.4.1'
 # strconv.py
 # Copyright (c) 2013 Byron Ruth
 # BSD License
-
-__version__ = '0.4.1'
-
-from collections import Counter
 
 
 class TypeInfo(object):
@@ -190,10 +194,6 @@ class Strconv(object):
 
 # Built-in converters
 
-import re
-
-from datetime import datetime
-
 # Use dateutil for more robust parsing
 try:
     from dateutil.parser import parse as duparse
@@ -208,6 +208,7 @@ except ImportError:
 DATE_FORMATS = (
     '%Y-%m-%d',
     '%m-%d-%Y',
+    '%Y/%m/%d',
     '%m/%d/%Y',
     '%m.%d.%Y',
     '%m-%d-%y',
@@ -221,7 +222,9 @@ TIME_FORMATS = (
     '%H:%M:%S',
     '%H:%M',
     '%I:%M:%S %p',
+    '%I:%M:%S %z',
     '%I:%M %p',
+    '%I:%M %z',
     '%I:%M',
 )
 
@@ -248,22 +251,21 @@ def convert_bool(s):
 
 
 def convert_datetime(s, date_formats=DATE_FORMATS, time_formats=TIME_FORMATS):
-    if duparse:
-        try:
-            dt = duparse(s)
-            if dt.time():
-                return duparse(s)
-        except TypeError:  # parse may throw this in py3
-            raise ValueError
+    if sys.version < '3.5':
+        if duparse:
+            try:
+                dt = duparse(s)
+                if dt.time():
+                    return duparse(s)
+            except TypeError:  # parse may throw this in py3
+                raise ValueError
 
     for df in date_formats:
         for tf in time_formats:
             for sep in DATE_TIME_SEPS:
                 f = '{0}{1}{2}'.format(df, sep, tf)
                 try:
-                    dt = datetime.strptime(s, f)
-                    if dt.time():
-                        return dt
+                    return datetime.strptime(s, f)
                 except ValueError:
                     pass
     raise ValueError
