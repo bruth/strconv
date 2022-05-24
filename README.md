@@ -126,7 +126,7 @@ Type inference of strings is a very difficult thing to generalize. Often times t
 Any of the default converters can be unregistered by name. This is recommended if the data is known not to have certain types.
 
 ```python
-strconv.unregister_convert('datetime')
+strconv.unregister_converter('datetime')
 ```
 
 **Strconv Class**
